@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#12152b" />
+    <title>Pathfinder 2e Sheet</title>
+
+    <!-- Add to Home Screen: opens without browser chrome, which is what you
+         want when the phone is sitting on the table next to the dice. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="PF2e Sheet" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- Home-screen icon, inlined so the one file stays self-contained.
+         iOS needs a PNG here; it applies its own rounded mask, so the art is
+         full-bleed. Swap the artwork with ICON=twenty npm run build. -->
+    <link rel="apple-touch-icon" href="data:image/png;base64,__ICON180__" />
+    <link rel="icon" type="image/png" sizes="192x192" href="data:image/png;base64,__ICON192__" />
+    <link rel="manifest" href="data:application/manifest+json;base64,__MANIFEST__" />
+
+    <style>
+      html, body, #root { margin: 0; height: 100%; background: #12152b; }
+      #boot { color: #a9a0cc; font: 15px/1.5 -apple-system, system-ui, sans-serif; padding: 40px 20px; }
+    </style>
+  </head>
+  <body>
+    <div id="root"><div id="boot">Loading the sheet…</div></div>
+    <script>
+      // Must run before the bundle: the sheet reads these while it loads.
+      window.PF2E_STANDALONE = true;
+      window.PF2E_API_PROXY = __PROXY__;
+
+      /* Cross-device sync. Leave this blank and the sheet saves to whichever
+         browser you opened it in, exactly as it always has. Fill it in with
+         your own Firebase project and the same characters open everywhere —
+         see "Syncing across devices" in the README. */
+      window.PF2E_FIREBASE = __FIREBASE__;
+    </script>
+    <!-- Defines window.storage before the sheet looks for it. -->
+    <script>__SYNC__</script>
+    <script>__APP__</script>
+  </body>
+</html>
