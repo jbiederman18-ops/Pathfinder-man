@@ -1,0 +1,56 @@
+name: Build sheet
+
+# Rebuilds index.html whenever the source changes, so the whole workflow
+# stays inside github.com — no terminal, no npm on your machine.
+#
+# Pages serves this repository's root, so the committed index.html, sw.js
+# and data/ are all live as soon as this finishes.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "build.mjs"
+      - "package.json"
+      - ".github/workflows/build.yml"
+  workflow_dispatch: # also runnable by hand from the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-sheet
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # `npm ci` needs a lockfile; fall back to install if there isn't one yet.
+      - name: Install
+        run: npm ci || npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Run tests
+        run: npm test --if-present
+
+      - name: Commit index.html if it changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- index.html; then
+            echo "No change to index.html."
+            exit 0
+          fi
+          git add index.html
+          git commit -m "Rebuild index.html [skip ci]"
+          git push
