@@ -43,7 +43,7 @@ const shell = readFileSync("src/shell.html", "utf8");
 /* Home-screen artwork, inlined. Three directions live in src/icons; pick one
    with ICON=twenty npm run build. iOS only reads PNG from apple-touch-icon,
    so these are rasters rather than the SVG the rest of the sheet uses. */
-const ICON = process.env.ICON || "facet";
+const ICON = process.env.ICON || "glass";
 const icon = (size) => readFileSync(`src/icons/${ICON}-${size}.png`).toString("base64");
 
 const manifest = {
