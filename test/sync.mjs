@@ -97,6 +97,12 @@ console.log("\nsetup codes");
   ok("it round-trips the project", back.c.projectId === "p", back);
   ok("and the room", back.r === "ABCD-EFGH-JKLM-NPQR");
   ok("a damaged code is refused", API.readSetupCode("PF2E1:not-base64!!") === null);
+  const body = code.slice("PF2E1:".length);
+  ok("an invisible character in front is ignored", API.readSetupCode("​" + code)?.r === "ABCD-EFGH-JKLM-NPQR");
+  ok("a label and quotes around it are ignored", API.readSetupCode("Setup code: \"" + code + "\"")?.r === "ABCD-EFGH-JKLM-NPQR");
+  ok("line breaks inside it are ignored", API.readSetupCode(code.replace(/(.{40})/g, "$1\n"))?.r === "ABCD-EFGH-JKLM-NPQR");
+  ok("a missing prefix still works", API.readSetupCode(body)?.r === "ABCD-EFGH-JKLM-NPQR");
+  ok("a plain sync code is not mistaken for one", API.readSetupCode("ABCD-EFGH-JKLM-NPQR") === null);
 }
 
 console.log("\ndiagnosing failures");

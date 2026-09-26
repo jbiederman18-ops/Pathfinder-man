@@ -250,9 +250,17 @@
     if (!c || !room()) return "";
     return CODE_PREFIX + btoa(unescape(encodeURIComponent(JSON.stringify({ c: c, r: room() }))));
   }
+  /* Forgiving on purpose: messaging apps, Notes and the iOS clipboard can add
+     invisible characters, quotes, line breaks or a label in front, or drop the
+     prefix entirely. Find the code wherever it sits and keep only base64. */
   function readSetupCode(text) {
+    var s = String(text || "");
+    var at = s.toUpperCase().indexOf(CODE_PREFIX.slice(0, -1));
+    if (at >= 0) s = s.slice(at + CODE_PREFIX.length - 1);
+    s = s.replace(/-/g, "+").replace(/_/g, "/").replace(/[^A-Za-z0-9+\/=]/g, "");
+    if (s.length < 24) return null;
     try {
-      var payload = JSON.parse(decodeURIComponent(escape(atob(text.slice(CODE_PREFIX.length).trim()))));
+      var payload = JSON.parse(decodeURIComponent(escape(atob(s))));
       if (!payload.c || !payload.c.projectId || !payload.r) return null;
       return payload;
     } catch (e) { return null; }
@@ -598,9 +606,11 @@
       var text = paste.value.trim();
       if (!text) return say(false, "Paste something in first.");
 
-      if (text.indexOf(CODE_PREFIX) === 0) {
-        var payload = readSetupCode(text);
-        if (!payload) return say(false, "That setup code is damaged. Copy it again from the other device.");
+      var payload = text.indexOf("{") < 0 ? readSetupCode(text) : null;
+      if (!payload && text.toUpperCase().indexOf(CODE_PREFIX.slice(0, -1)) >= 0) {
+        return say(false, "That setup code is damaged. Copy it again from the other device.");
+      }
+      if (payload) {
         setConfig(payload.c);
         setRoom(payload.r);
         paste.value = "";
